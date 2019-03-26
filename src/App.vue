@@ -3,15 +3,19 @@
     <b-container fluid v-if="authorized">
       <h1>Финансы</h1>
       <b-form action="#" @submit.prevent="onSubmit" class="mb-4" inline>
-        <b-form-input type="number" placeholder="Пришли финансы" v-model="money" />
-        <b-button variant="success" type="submit">Добавить</b-button>
+        <b-input-group>
+          <b-form-input type="number" placeholder="Пришли финансы" v-model="money" />
+          <b-input-group-append>
+            <b-button variant="success" type="submit">Добавить</b-button>
+          </b-input-group-append>
+        </b-input-group>
       </b-form>
       <b-tabs>
         <b-tab title="Finance">
           <b-list-group>
-            <b-list-group-item v-for="(val,key,index) in finance[0]" :key="index" class="d-flex align-items-center">
+            <b-list-group-item v-for="(val,key,index) in finance[0]" :key="index" class="d-flex flex-column flex-sm-row align-items-center">
               <span>{{names[0][key]}} - {{val}} руб</span>
-              <b-button-group class="ml-4">
+              <b-button-group class="ml-4 mt-2 mt-sm-0">
                 <b-button @click.prevent="setDataOne(key, false, 'finance')">-</b-button>
                 <b-button @click.prevent="setDataOne(key, true, 'finance')" variant="success">+</b-button>
                 <b-button @click.prevent="setDataOne(key, 'new', 'finance')" variant="info">new</b-button>
@@ -22,9 +26,9 @@
         <b-tab title="Percent">
           <b-list-group>
             <b-list-group-item>Всего процентов - {{allPercentValue}}</b-list-group-item>
-            <b-list-group-item v-for="(val,key,index) in percent[0]" :key="index" class="d-flex align-items-center">
+            <b-list-group-item v-for="(val,key,index) in percent[0]" :key="index" class="d-flex flex-column flex-sm-row align-items-center">
               <span>{{names[0][key]}} - {{val}} %</span>
-              <b-button-group class="ml-4">
+              <b-button-group class="ml-4 mt-2 mt-sm-0">
                 <b-button @click.prevent="setDataOne(key, false, 'percent')">-</b-button>
                 <b-button @click.prevent="setDataOne(key, true, 'percent')" variant="success">+</b-button>
                 <b-button @click.prevent="setDataOne(key, 'new', 'percent')" variant="info">new</b-button>
@@ -33,17 +37,22 @@
           </b-list-group>
         </b-tab>
       </b-tabs>
-      <b-modal v-model="changeValueModal" title="ChangeValue" centered hide-footer @shown="focusMyElement">
+      <b-modal v-model="changeValueModal" centered hide-header hide-footer @shown="focusMyElement">
         <b-form action="#" @submit.prevent="changeDataOne">
-          <b-form-input type="number" v-model="changeValue" ref="focusThis" step="0.01" />
+          <b-input-group>
+            <b-form-input type="number" v-model="changeValue" ref="focusThis" step="0.01" />
+            <b-input-group-append>
+              <b-button variant="success" type="submit">{{ activeActions === 'new' ? 'Новое значение' : activeActions === 'minus' ? 'Убавить' : 'Добавить' }}</b-button>
+            </b-input-group-append>
+          </b-input-group>
         </b-form>
       </b-modal>
       <b-alert class="alert" fade :show="dismissCountDown" dismissible @dismissed="onDismissed" :variant="alert.variant">
         {{alert.text}}
       </b-alert>
+      <b-button variant="danger" @click.prevent="resetData" class="mt-4" block>Очистить данные</b-button>
     </b-container>
     <b-container fluid v-else>
-      <h2>Hello world</h2>
       <b-form action="#" @submit.prevent="onLogin">
         <b-form-group label="Email address:" label-for="exampleInput1">
           <b-form-input id="exampleInput1"
@@ -72,7 +81,7 @@ export default {
   name: 'App',
   data () {
     return {
-      authorized: false,
+      authorized: true,
       percent: [],
       finance: [],
       names: [],
@@ -113,10 +122,15 @@ export default {
 
       Object.keys(this.finance[0]).map(el => {
         content[el] = this.finance[0][el] + +(perc[el]*factor).toFixed()
-        // обнуление для тестов
-        // content[el] = 0
       })
 
+      this.setData('finance', this.financeDoc, content)
+    },
+    resetData () {
+      let content = {};
+      Object.keys(this.finance[0]).map(el => {
+        content[el] = 0
+      })
       this.setData('finance', this.financeDoc, content)
     },
     changeDataOne () {
@@ -201,4 +215,9 @@ export default {
   top: 20px;
   z-index: 100;
 }
+
+#app .btn-group .btn {
+  min-width: 70px;
+}
+
 </style>
